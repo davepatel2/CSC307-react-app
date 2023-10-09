@@ -19,6 +19,11 @@ const addUser = (user) => {
     return user;
 }
 
+function genID(){
+    const ID = Math.random().toString().replace(".","");
+    return ID;
+}
+
 
 
 const users = { 
@@ -55,19 +60,22 @@ app.use(express.json());
 
 app.post('/users', (req, res) => {
     const userToAdd = req.body;
+    userToAdd.id = genID();
     addUser(userToAdd);
-    res.send();
+    res.status(201).json({message: "User created successfully", user: userToAdd});
 });
+
 
 app.delete("/users/:id", (req,res) => {
     const id = req.params["id"];
     let result = findUserById(id);
     if(result  === undefined){
-        res.send("User Id not found");
+        res.status(404).send("User Id not found");
     
     }else{
-        users["users_list"].splice(result,1);
-        res.send("removed user");
+        const userindex = users["users_list"].findIndex((userindex) => userindex["id"] === id);
+        users["users_list"].splice(userindex,1);
+        res.status(204).send("removed user");
     }
     
 })
@@ -82,24 +90,28 @@ app.get('/users/:id', (req, res) => {
     }
 });
 
-app.get('/users', (req, res) => {
+
+
+app.get("/users", (req, res) => {
     const name = req.query.name;
-    if (name != undefined){
-        let result = findUserByName(name);
-        result = {users_list: result};
+    const userjob = req.query.job;
+    if (name != undefined) {
+      let result = findUserByName(name);
+      result = { users_list: result };
+      if (userjob != undefined) {
+        let jobname = users['users_list'].filter( (user) => user['job'] === userjob); 
+        jobname = { users_list: jobname };
+        res.send(jobname);
+      } else {
         res.send(result);
+      }
+    } else {
+      res.send(users);
     }
-    else{
-        res.send(users);
-    }
-});
+  });
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
-});
-
-app.get('/users', (req, res) => {
-    res.send(users);
 });
 
 
