@@ -18,28 +18,21 @@ function MyApp() {
 
 
     function removeOneCharacter (index) {
-	    const userToDelete = characters[index];
+	    const deluser = characters[index];
 
-    fetch(`http://localhost:8000/users/${userToDelete.id}`, {
+	fetch(`http://localhost:8000/users/${deluser.id}`, {
       method: 'DELETE',
-    })
-    .then((response) => {
-      if (response.status === 204) {
-        const updated = characters.filter((character, i) => { return i !== index; });
-        setCharacters(updated);
+   	}).then((response) => {
+      if (response.status === 204) {const refresh = characters.filter((character, i) => { return i !== index; });
+        setCharacters(refresh);
         console.log("Successfuly deleted user.")
+      }else if (response.status === 404) {
+        console.log("Cant find user");
+      }else {
+        console.log("Error with removing", response.status);
       }
-      else if (response.status === 404) {
-        console.log("User not found on server.");
-      }
-      else {
-        console.log("Error removing user:", response.status);
-      }
-    })
-    .catch((error) => {
-      console.error("Error deleting user:", error);
     });
-	}
+}
 	
 	
 
@@ -67,7 +60,7 @@ function MyApp() {
 			if(response.status === 201){
 				return response.json();
 			}else{
-				throw new Error ("failed to push")
+				throw new Error ("failed")
 			}
 		})
 		  .then((response) => setCharacters([...characters, response.user]))
